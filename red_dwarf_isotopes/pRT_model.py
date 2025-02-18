@@ -1,12 +1,22 @@
-"""Generate a model spectrum with petitRADTRANS given a set of parameters.
+"""
+Radiative transfer modeling using petitRADTRANS.
 
-WARNING: this is a read-only script, to generate model spectra you need the opacities
-and the petitRADTRANS v2.7.7 installation.
+This module provides a wrapper around petitRADTRANS for generating synthetic spectra
+of red dwarf stars. It handles the setup of atmospheric structures, opacity sources,
+and spectral calculations.
 
-If you wish to obtain the opacities (>100 GB), please contact picos(at)strw.leidenuniv.nl
+Note
+----
+This is a read-only script. To generate model spectra, you need:
+1. petitRADTRANS v2.7.7 installation
+2. Line-by-line opacity data (>100 GB)
+
+For opacity data access, contact: picos(at)strw.leidenuniv.nl
 """
 
+from typing import Dict, List, Optional, Tuple, Union
 import numpy as np
+import numpy.typing as npt
 
 from petitRADTRANS import Radtrans
 import petitRADTRANS.nat_cst as nc
@@ -14,229 +24,251 @@ import petitRADTRANS.nat_cst as nc
 from .spectrum import ModelSpectrum
 from retrieval_base.auxiliary_functions import apply_PT_cutoff
 
-class pRT_model:
+ArrayType = npt.NDArray[np.float64]
 
-    def __init__(self, 
-                 line_species, 
-                 d_spec, 
-                 mode='lbl', 
-                 lbl_opacity_sampling=3, 
-                 rayleigh_species=['H2', 'He'], 
-                 continuum_opacities=['H2-H2', 'H2-He'], 
-                 log_P_range=(-5,2), 
-                 n_atm_layers=40, 
-                 pressure=None,
-                 chem_mode='free', 
-                 rv_range=(-50,50),
-                 T_cutoff=None,
-                 P_cutoff=None,
-                 ):
-        '''
-        Create instance of the pRT_model class.
+class PRTModel:
+    """
+    petitRADTRANS model wrapper for generating synthetic stellar spectra.
+    
+    This class handles the setup and computation of radiative transfer models
+    using petitRADTRANS, including atmospheric structure, opacities, and
+    spectral synthesis.
+    
+    Attributes
+    ----------
+    d_wave : ArrayType
+        Wavelength grid from observed data
+    d_resolution : float
+        Spectral resolution of observed data
+    line_species : List[str]
+        Species to include in line opacity calculations
+    mode : str
+        petitRADTRANS mode ('lbl' or 'c-k')
+    pressure : ArrayType
+        Atmospheric pressure grid
+    atm : List[Radtrans]
+        petitRADTRANS atmosphere objects for each spectral order
+    """
 
-        Input
-        -----
-        line_species : list
-            Names of line-lists to include.
-        d_spec : DataSpectrum
-            Instance of the DataSpectrum class.
-        mode : str
-            pRT mode to use, can be 'lbl' or 'c-k'.
-        lbl_opacity_sampling : int
-            Let pRT sample every n-th datapoint.
-        cloud_species : list or None
-            Chemical cloud species to include. 
-        rayleigh_species : list
-            Rayleigh-scattering species.
-        continuum_opacities : list
-            CIA-induced absorption species.
-        log_P_range : tuple or list
-            Logarithm of modelled pressure range.
-        n_atm_layers : int
-            Number of atmospheric layers to model.
-        chem_mode : str
-            Chemistry mode to use for clouds, can be 'free' or 'eqchem'.
-        
-        '''
+    def __init__(
+        self, 
+        line_species: List[str],
+        data_spectrum: 'DataSpectrum',
+        mode: str = 'lbl',
+        lbl_opacity_sampling: int = 3,
+        rayleigh_species: List[str] = ['H2', 'He'],
+        continuum_opacities: List[str] = ['H2-H2', 'H2-He'],
+        pressure: Optional[ArrayType] = None,
+        log_P_range: Tuple[float, float] = (-5, 2),
+        n_atm_layers: int = 40,
+        rv_range: Tuple[float, float] = (-50, 50),
+        T_cutoff: Optional[Tuple[float, float]] = None,
+        P_cutoff: Optional[Tuple[float, float]] = None,
+    ) -> None:
+        """
+        Initialize PRTModel.
 
-        # Read in attributes of the observed spectrum
-        self.d_wave          = d_spec.wave
-        self.d_mask_isfinite = d_spec.mask_isfinite
-        self.d_resolution    = d_spec.resolution
-        self.apply_high_pass_filter = d_spec.high_pass_filtered
-        self.w_set = d_spec.w_set
+        Parameters
+        ----------
+        line_species : List[str]
+            List of species to include in line opacity calculations
+        data_spectrum : DataSpectrum
+            Observed spectrum object containing wavelength grid and properties
+        mode : str, optional
+            petitRADTRANS mode ('lbl' or 'c-k'), by default 'lbl'
+        lbl_opacity_sampling : int, optional
+            Sampling rate for line-by-line calculations, by default 3
+        rayleigh_species : List[str], optional
+            Species for Rayleigh scattering, by default ['H2', 'He']
+        continuum_opacities : List[str], optional
+            Species for continuum opacity, by default ['H2-H2', 'H2-He']
+        pressure : Optional[ArrayType], optional
+            Custom pressure grid, by default None
+        log_P_range : Tuple[float, float], optional
+            Log pressure range [min, max], by default (-5, 2)
+        n_atm_layers : int, optional
+            Number of atmospheric layers, by default 40
+        rv_range : Tuple[float, float], optional
+            Radial velocity range [min, max] in km/s, by default (-50, 50)
+        T_cutoff : Optional[Tuple[float, float]], optional
+            Temperature cutoff range for custom opacities, by default None
+        P_cutoff : Optional[Tuple[float, float]], optional
+            Pressure cutoff range for custom opacities, by default None
+        """
+        # Store data properties
+        self.d_wave = data_spectrum.wave
+        self.d_mask_isfinite = data_spectrum.mask_isfinite
+        self.d_resolution = data_spectrum.resolution
+        self.w_set = data_spectrum.w_set
 
+        # Store model parameters
         self.line_species = line_species
         self.mode = mode
         self.lbl_opacity_sampling = lbl_opacity_sampling
-
-        self.rayleigh_species  = rayleigh_species
+        self.rayleigh_species = rayleigh_species
         self.continuum_species = continuum_opacities
         
-        self.T_cutoff = T_cutoff # temperature cutoff for custom line opacities
-        self.P_cutoff = P_cutoff # pressure cutoff for custom line opacities
+        # Temperature and pressure cutoffs for custom opacities
+        self.T_cutoff = T_cutoff
+        self.P_cutoff = P_cutoff
 
-        self.chem_mode  = chem_mode
+        # Set maximum RV for wavelength padding
+        self.rv_max = max(40.0, max(abs(rv_range[0]), abs(rv_range[1])))
 
-        self.rv_max = max(40.0, max(np.abs(list(rv_range))))
-
-        # Define the atmospheric layers
-        if log_P_range is None:
-            log_P_range = (-5,2)
-        if n_atm_layers is None:
-            n_atm_layers = 40
-            
+        # Set up atmospheric pressure grid
         if pressure is None:
             self.pressure = np.logspace(log_P_range[0], log_P_range[1], n_atm_layers)
         else:
             self.pressure = np.array(pressure)
 
-        # Make the pRT.Radtrans objects
-        self.get_atmospheres()
+        # Initialize petitRADTRANS atmospheres
+        self._setup_atmospheres()
 
-    def get_atmospheres(self):
-
-        # pRT model is somewhat wider than observed spectrum
+    def _setup_atmospheres(self) -> None:
+        """
+        Initialize petitRADTRANS atmosphere objects for each spectral order.
+        
+        This creates separate Radtrans objects for each order to handle
+        different wavelength ranges efficiently.
+        """
+        # Calculate wavelength ranges with padding for RV shifts
         wave_pad = 1.1 * self.rv_max/(nc.c*1e-5) * self.d_wave.max()
+        self.wave_range_micron = np.vstack([
+            self.d_wave.min(axis=(1,2)) - wave_pad,
+            self.d_wave.max(axis=(1,2)) + wave_pad
+        ]).T * 1e-3  # Convert to microns
 
-        self.wave_range_micron = np.concatenate(
-            (self.d_wave.min(axis=(1,2))[None,:]-wave_pad, 
-             self.d_wave.max(axis=(1,2))[None,:]+wave_pad
-            )).T
-        self.wave_range_micron *= 1e-3
-
+        # Create atmosphere objects for each order
         self.atm = []
-        for wave_range_i in self.wave_range_micron:
-            print(f' Loading opacities for wavelength range {wave_range_i[0]:.2f}-{wave_range_i[1]:.2f} micron')
-            # Make a pRT.Radtrans object
-            atm_i = Radtrans(
-                line_species=self.line_species, 
-                rayleigh_species=self.rayleigh_species, 
-                continuum_opacities=self.continuum_species, 
-                wlen_bords_micron=wave_range_i, 
-                mode=self.mode, 
-                lbl_opacity_sampling=self.lbl_opacity_sampling, 
-                )
+        for i, wave_range in enumerate(self.wave_range_micron):
+            print(f'Loading opacities for {wave_range[0]:.2f}-{wave_range[1]:.2f} μm')
+            
+            # Initialize Radtrans object
+            atm = Radtrans(
+                line_species=self.line_species,
+                rayleigh_species=self.rayleigh_species,
+                continuum_opacities=self.continuum_species,
+                wlen_bords_micron=wave_range,
+                mode=self.mode,
+                lbl_opacity_sampling=self.lbl_opacity_sampling,
+            )
 
-            # Set up the atmospheric layers
-            atm_i.setup_opa_structure(self.pressure)
+            # Set up atmospheric structure
+            atm.setup_opa_structure(self.pressure)
+            
+            # Apply temperature-pressure cutoffs if specified
             if self.T_cutoff is not None:
-                self.P_cutoff = getattr(self, 'P_cutoff', (np.min(self.pressure), np.max(self.pressure)))
-                atm_i = apply_PT_cutoff(atm_i, *self.T_cutoff, *self.P_cutoff)
-            self.atm.append(atm_i)
+                P_range = self.P_cutoff or (self.pressure.min(), self.pressure.max())
+                atm = apply_PT_cutoff(atm, *self.T_cutoff, *P_range)
+                
+            self.atm.append(atm)
 
-    def __call__(self, 
-                 mass_fractions, 
-                 temperature, 
-                 params, 
-                 ):
-        '''
-        Create a new model spectrum with the given arguments.
+    def __call__(
+        self,
+        mass_fractions: Dict[str, ArrayType],
+        temperature: ArrayType,
+        params: Dict[str, Union[float, ArrayType]]
+    ) -> ModelSpectrum:
+        """
+        Generate a synthetic spectrum with given parameters.
 
-        Input
-        -----
-        mass_fractions : dict
-            Species' mass fractions in the pRT format.
-        temperature : np.ndarray
-            Array of temperatures at each atmospheric layer.
-        params : dict
-            Parameters of the current model.
-    
+        Parameters
+        ----------
+        mass_fractions : Dict[str, ArrayType]
+            Mass fractions for each species
+        temperature : ArrayType
+            Temperature profile
+        params : Dict[str, Union[float, ArrayType]]
+            Model parameters including:
+            - log_g: Surface gravity
+            - rv: Radial velocity (km/s)
+            - vsini: Projected rotational velocity (km/s)
+            - epsilon_limb: Limb darkening coefficient
+            - resolution: Spectral resolution (optional)
+            - gamma: Lorentzian component for Voigt profile (optional)
+            - fwhm: FWHM for Voigt profile (optional)
+
         Returns
         -------
-        m_spec : ModelSpectrum class
-            Instance of the ModelSpectrum class. 
-        '''
-
-        # Update certain attributes
+        ModelSpectrum
+            Synthetic spectrum object
+        """
         self.mass_fractions = mass_fractions
-        self.temperature    = temperature
+        self.temperature = temperature
         self.params = params
+        
+        return self._compute_spectrum()
 
-        # Generate a model spectrum
-        m_spec = self.get_model_spectrum()
-        return m_spec
-
-    def get_model_spectrum(self):
-        '''
-        Generate a model spectrum with the given parameters.
+    def _compute_spectrum(self) -> ModelSpectrum:
+        """
+        Compute synthetic spectrum for all spectral orders.
 
         Returns
         -------
-        m_spec : ModelSpectrum class
-            Instance of the ModelSpectrum class
-        '''
-
-        # Loop over all orders
+        ModelSpectrum
+            Combined synthetic spectrum for all orders
+        """
         wave = np.ones_like(self.d_wave) * np.nan
         flux = np.ones_like(self.d_wave) * np.nan
         
-        for i, atm_i in enumerate(self.atm):
-            
-            # Compute the emission spectrum
-            atm_i.calc_flux(
-                self.temperature, 
-                self.mass_fractions, 
-                gravity=10.0**self.params['log_g'], 
-                mmw=self.mass_fractions['MMW'], 
-                )
-            wave_i = nc.c / atm_i.freq
-            flux_i = np.where(np.isfinite(atm_i.flux), atm_i.flux, 0.0)
-            overflow = np.log(atm_i.flux) > 20
-            atm_i.flux[overflow] = 0.0
-            
-            flux_i = atm_i.flux *  nc.c / (wave_i**2)
-
-            # Convert [erg cm^{-2} s^{-1} cm^{-1}] -> [erg cm^{-2} s^{-1} nm^{-1}]
-            flux_i = flux_i * 1e-7
-
-            # Convert [cm] -> [nm]
-            wave_i *= 1e7
-
-            # Convert to observation by scaling with planetary radius
-            R_p = getattr(self.params, 'R_p', 0.0)
-            if R_p > 0:
-                flux_i *= (
-                    (R_p*nc.r_jup_mean) / \
-                    (1e3/self.params['parallax']*nc.pc)
-                    )**2
-
-            # Create a ModelSpectrum instance
-            m_spec_i = ModelSpectrum(
-                wave=wave_i, flux=flux_i, 
-                lbl_opacity_sampling=self.lbl_opacity_sampling
-                )
-            
-            # Apply radial-velocity shift, rotational/instrumental broadening
-            m_spec_i.shift_broaden_rebin(
-                rv=self.params['rv'], 
-                vsini=self.params['vsini'], 
-                epsilon_limb=self.params['epsilon_limb'], 
-                out_res=self.params.get('resolution', self.d_resolution), 
-                in_res=m_spec_i.resolution, 
-                rebin=False, 
-                gamma=self.params.get('gamma', None),
-                fwhm=self.params.get('fwhm', None),
-                )
-
-            # Rebin onto the data's wavelength grid
-            m_spec_i.rebin(d_wave=self.d_wave[i,:], replace_wave_flux=True)
-
-            wave[i,:,:] = m_spec_i.wave
-            flux[i,:,:] = m_spec_i.flux
-            
-
-        # Create a new ModelSpectrum instance with all orders
-        m_spec = ModelSpectrum(
-            wave=wave, 
-            flux=flux, 
-            lbl_opacity_sampling=self.lbl_opacity_sampling, 
+        # Process each order
+        for i, atm in enumerate(self.atm):
+            # Compute radiative transfer
+            atm.calc_flux(
+                self.temperature,
+                self.mass_fractions,
+                gravity=10.0**self.params['log_g'],
+                mmw=self.mass_fractions['MMW']
             )
-    
-        # Save memory, same attributes in DataSpectrum
-        del m_spec.wave, m_spec.mask_isfinite
+            
+            # Convert wavelength and flux
+            wave_i = nc.c / atm.freq * 1e7  # Convert to nm
+            flux_i = atm.flux * nc.c / (wave_i/1e7)**2  # Convert to per wavelength
+            
+            # Handle numerical overflow
+            flux_i = np.where(np.log(flux_i) <= 20, flux_i, 0.0)
+            
+            # Convert units
+            flux_i *= 1e-7  # erg/cm²/s/nm
+            
+            # Apply stellar radius scaling if needed
+            R_p = self.params.get('R_p', 0.0)
+            if R_p > 0:
+                flux_i *= ((R_p*nc.r_jup_mean) / 
+                          (1e3/self.params['parallax']*nc.pc))**2
 
-        return m_spec
+            # Create and process model spectrum
+            model = ModelSpectrum(
+                wave=wave_i,
+                flux=flux_i,
+                lbl_opacity_sampling=self.lbl_opacity_sampling
+            )
+            
+            # Apply spectral operations
+            model.shift_broaden_rebin(
+                rv=self.params['rv'],
+                vsini=self.params['vsini'],
+                epsilon_limb=self.params['epsilon_limb'],
+                out_res=self.params.get('resolution', self.d_resolution),
+                in_res=model.resolution,
+                rebin=False,
+                gamma=self.params.get('gamma'),
+                fwhm=self.params.get('fwhm')
+            )
+
+            # Rebin to data wavelength grid
+            model.rebin(d_wave=self.d_wave[i,:], replace_wave_flux=True)
+            
+            # Store results
+            wave[i,:,:] = model.wave
+            flux[i,:,:] = model.flux
+
+        # Create combined spectrum
+        return ModelSpectrum(
+            wave=wave,
+            flux=flux,
+            lbl_opacity_sampling=self.lbl_opacity_sampling
+        )
 
 
 

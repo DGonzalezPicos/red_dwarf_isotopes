@@ -323,6 +323,83 @@ class Spectrum:
         self.update_isfinite_mask()
         return self
     
+    
+class DataSpectrum(Spectrum):
+    """Class for handling observed spectra with additional functionality.
+    
+    This class extends the base Spectrum class with additional features
+    specific to observed spectra, such as masking and normalization.
+    
+    Parameters
+    ----------
+    wave : Optional[ArrayType]
+        Wavelength array, by default None
+    flux : Optional[ArrayType] 
+        Flux array, by default None
+    err : Optional[ArrayType]
+        Error array, by default None
+    w_set : str
+        Wavelength set identifier, by default 'spirou'
+    file_path : Optional[str]
+        Path to spectrum file, by default None
+        
+    Attributes
+    ----------
+    file_path : Optional[str]
+        Path to input spectrum file
+    transm : Optional[ArrayType]
+        Transmission spectrum if available
+    """
+    
+    def __init__(self, 
+                 wave: Optional[ArrayType] = None, 
+                 flux: Optional[ArrayType] = None, 
+                 err: Optional[ArrayType] = None, 
+                 w_set: str = 'spirou',
+                 file_path: Optional[str] = None) -> None:
+        
+        self.file_path = file_path
+        if self.file_path is not None:
+            # Load data from file if path provided
+            wave, flux, err, transm = self.load_spectrum_spirou(self.file_path)
+            self.transm = transm
+    
+        super().__init__(wave, flux, err, w_set)
+        
+    def load_spectrum_spirou(self, file_path: str) -> Tuple[ArrayType, ArrayType, ArrayType, Optional[ArrayType]]:
+        """Load SPIRou spectrum from .npy file.
+        
+        Parameters
+        ----------
+        file_path : str
+            Path to .npy file containing spectrum data
+            
+        Returns
+        -------
+        wave : ArrayType
+            Wavelength array
+        flux : ArrayType
+            Flux array  
+        err : ArrayType
+            Error array
+        transm : Optional[ArrayType]
+            Transmission spectrum if available, else None
+        """
+        # Load numpy array
+        data = np.load(file_path)
+        
+        # Transpose if needed to get correct shape
+        if data.shape[-1] < data.shape[0]:
+            data = data.T
+            
+        # Extract arrays
+        wave, flux, err = data[:3]
+        
+        # Get transmission if available
+        transm = data[3] if len(data) > 3 else None
+        
+        return wave, flux, err, transm
+    
 
 class ModelSpectrum(Spectrum):
     """Class for handling model spectra with additional functionality.
