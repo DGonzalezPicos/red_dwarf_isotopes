@@ -1,4 +1,3 @@
-"""
 # Red Dwarf Isotopes
 
 This repository contains supplementary code and data visualization for our research paper on isotopic compositions in red dwarf stars. The code provides tools for manipulating and plotting high-resolution spectroscopic data, with a focus on molecular isotopologues in M-dwarf atmospheres.
@@ -20,12 +19,6 @@ Several features of this code are adapted from the package [samderegt/retrieval_
   - Radiative transfer modeling
   - Isotopologue abundance analysis
 
-- Data handling and visualization:
-  - Robust file path management
-  - Automated directory creation
-  - Publication-quality plotting
-  - Error handling and validation
-
 ## Installation
 
 ```bash
@@ -43,15 +36,7 @@ pip install -e .
 
 ## Dependencies
 
-All required Python packages are listed in `requirements.txt` and will be automatically installed with the above commands:
-
-- numpy (≥1.24.0): Array operations and numerical computations
-- scipy (≥1.10.0): Scientific computing and interpolation
-- petitRADTRANS (≥2.0.0): Radiative transfer calculations
-- spectres (≥0.1.0): Spectral resampling
-- pyasl (≥3.0.0): Astronomical algorithms
-- pyparsing (≥3.0.0): Parsing utilities
-- pydantic (≥2.0.0): Data validation
+All required Python packages are listed in `requirements.txt` and will be automatically installed with the above commands.
 
 Note: petitRADTRANS installation is required for radiative transfer modeling. See the [petitRADTRANS documentation](https://petitRADTRANS.readthedocs.io/en/2.7.7/content/installation.html) for installation instructions. Line-by-line opacities must be downloaded separately (contact: picos(at)strw.leidenuniv.nl).
 
@@ -92,8 +77,8 @@ temperature = np.linspace(1000, 3000, 40)  # K
 pt_profile = get_PT_profile_class(pressure, mode='RCE')
 params = {
     'log_P_RCE': 0.0,
-    'dlnT_dlnP_knots': [0.2, 0.15, 0.1, 0.05],
-    'T_0': 2500
+    'dlnT_dlnP_knots': [0.20, 0.15, 0.10, 0.05],
+    'T_0': 5000
 }
 temperature = pt_profile(params)
 
@@ -111,25 +96,11 @@ chemistry = get_chemistry_class(
 
 # Calculate mass fractions
 params = {
-    'alpha_12CO': -1.0,  # CO abundance scaling
+    'alpha_12CO': -0.4,  # CO abundance scaling
     'alpha_H2O': -0.2,   # H2O abundance scaling
 }
 mass_fractions = chemistry(params, temperature)
 ```
-
-### File Management
-
-```python
-from red_dwarf_isotopes import get_data_file, get_data_dir, ensure_dir_exists
-
-# Get paths
-data_file = get_data_file('gl15A/bestfit_spec.npy')
-output_dir = get_data_dir() / 'outputs'
-
-# Ensure directory exists
-ensure_dir_exists(output_dir)
-```
-
 ## Project Structure
 
 ```
@@ -159,10 +130,6 @@ red_dwarf_isotopes/
 If you use this code in your research, please cite our paper:
 
 [Paper citation to be added upon publication]
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
