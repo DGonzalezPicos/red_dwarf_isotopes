@@ -1,4 +1,4 @@
-# Red Dwarf Isotopes Analysis
+# Red Dwarf Isotopes
 
 This repository contains supplementary code and data visualization for our research paper on isotopic compositions in red dwarf stars. The code provides tools for manipulating and plotting high-resolution spectroscopic data. It also includes a basic example of the radiative transfer model used to compute the synthetic spectra.
 
@@ -89,24 +89,6 @@ red_dwarf_isotopes/
 ├── README.md         # This file
 ├── requirements.txt  # Package dependencies
 └── setup.py         # Package installation script
-```
-
-## Contributing
-
-We welcome contributions! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
-
-### Development Setup
-
-```bash
-# Install development dependencies
-pip install -e ".[dev]"
-
-# Run tests
-pytest
-
-# Check code style
-black red_dwarf_isotopes
-flake8 red_dwarf_isotopes
 ```
 
 ## Citation
