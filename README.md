@@ -38,7 +38,7 @@ pip install -e .
 
 All required Python packages are listed in `requirements.txt` and will be automatically installed with the above commands.
 
-Note: petitRADTRANS installation is required for radiative transfer modeling. See the [petitRADTRANS documentation](https://petitRADTRANS.readthedocs.io/en/2.7.7/content/installation.html) for installation instructions. Line-by-line opacities must be downloaded separately (contact: picos(at)strw.leidenuniv.nl).
+Note: petitRADTRANS installation is required for radiative transfer modeling. See the [petitRADTRANS documentation](https://petitRADTRANS.readthedocs.io/en/2.7.7/content/installation.html) for installation instructions. Line-by-line opacities must be downloaded separately.
 
 ## Usage
 

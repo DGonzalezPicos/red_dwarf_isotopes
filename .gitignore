@@ -34,7 +34,6 @@ ENV/
 .ipynb_checkpoints
 
 # Data files
-data/*
 !data/.gitkeep
 *.npz
 *.fits
