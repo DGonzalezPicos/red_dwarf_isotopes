@@ -2,6 +2,8 @@
 
 This repository contains supplementary code and data visualization for our research paper on isotopic compositions in red dwarf stars. The code provides tools for manipulating and plotting high-resolution spectroscopic data. It also includes a basic example of the radiative transfer model used to compute the synthetic spectra.
 
+Several features of this code are adapted from the package [samderegt/retrieval_base](https://github.com/samderegt/retrieval_base).
+
 ### Key Features
 
 - Spectral analysis tools for high-resolution stellar spectra

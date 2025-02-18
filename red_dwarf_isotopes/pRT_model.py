@@ -21,7 +21,7 @@ import numpy.typing as npt
 from petitRADTRANS import Radtrans
 import petitRADTRANS.nat_cst as nc
 
-from .spectrum import ModelSpectrum
+from .spectrum import DataSpectrum, ModelSpectrum
 from retrieval_base.auxiliary_functions import apply_PT_cutoff
 
 ArrayType = npt.NDArray[np.float64]
