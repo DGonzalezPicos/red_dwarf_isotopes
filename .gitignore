@@ -55,4 +55,4 @@ htmlcov/
 dist/
 build/ 
 
-move_data.py
+.move_data.py
