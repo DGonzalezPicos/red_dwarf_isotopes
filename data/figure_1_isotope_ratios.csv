@@ -1,0 +1,96 @@
+# Supplementary data for Figure 1: Isotope ratios in M dwarf atmospheres
+# Generated on: 2025-06-10 11:38:09
+# Authors: Darío González Picos, Ignas Snellen and Sam de Regt
+# Contact: picos@strw.leidenuniv.nl
+#
+# Data description:
+# This file contains carbon and oxygen isotope ratio measurements from
+# high-resolution infrared spectroscopy and Bayesian atmospheric retrieval
+# analysis of M dwarf stars. Isotope ratios are derived from CO molecular
+# lines in the K-band using the petitRADTRANS radiative transfer code.
+#
+# Reference values:
+# Solar ¹²C/¹³C = 93.5 ± 3.0 (Ayres et al. 2013)
+# Solar ¹⁶O/¹⁸O = 529.7 ± 1.7 (Ayres et al. 2013)
+# ISM ¹²C/¹³C = 68.0 ± 14.0 (Milam et al. 2005)
+# ISM ¹⁶O/¹⁸O = 557 ± 30 (Wilson et al. 1999)
+#
+# Methodology:
+# - Isotope ratios derived from CO line analysis in K-band spectra
+# - Atmospheric retrieval using petitRADTRANS and PyMultiNest
+# - Bayesian evidence (ln B) and significance (σ) calculated via nested sampling
+# - σ > 3: significant detection, σ < 3: upper limit
+# - Uncertainties represent 1-sigma (68% confidence) intervals
+#
+# Metallicity and alpha enhancement information:
+# - [M/H] values from Cristofari et al. (2023), MNRAS, 522, 1342
+# - [α/Fe] values from Cristofari et al. (2023), MNRAS, 522, 1342
+# - Typical [M/H] uncertainty: ±0.10 dex
+# - Typical [α/Fe] uncertainty: ±0.05 dex
+#
+# Column descriptions:
+# target: Target identifier (gl format)
+# star_name: Star name (Gl format)
+# teff_k: Effective temperature in Kelvin
+# metallicity_mh: [M/H] metallicity
+# alpha_fe: [α/Fe] alpha enhancement
+# alpha_fe_error: [α/Fe] uncertainty
+# carbon_isotope_ratio_q16: ¹²C/¹³C 16th percentile (1-σ lower bound)
+# carbon_isotope_ratio_q50: ¹²C/¹³C 50th percentile (median)
+# carbon_isotope_ratio_q84: ¹²C/¹³C 84th percentile (1-σ upper bound)
+# carbon_lnb: Natural logarithm of Bayesian evidence for ¹³CO detection
+# carbon_sigma: Statistical significance of ¹³CO detection
+# oxygen_isotope_ratio_q16: ¹⁶O/¹⁸O 16th percentile (1-σ lower bound)
+# oxygen_isotope_ratio_q50: ¹⁶O/¹⁸O 50th percentile (median)
+# oxygen_isotope_ratio_q84: ¹⁶O/¹⁸O 84th percentile (1-σ upper bound)
+# oxygen_lnb: Natural logarithm of Bayesian evidence for C¹⁸O detection
+# oxygen_sigma: Statistical significance of C¹⁸O detection
+#
+# Units:
+# - Isotope ratios: dimensionless
+# - Temperature: Kelvin
+# - Metallicity: dex (solar-normalized logarithmic scale)
+# - Alpha enhancement: dex (solar-normalized logarithmic scale)
+# - ln B: dimensionless (natural logarithm)
+# - σ: dimensionless (statistical significance)
+#
+# References:
+# - Solar isotope ratios: Ayres et al. (2013), ApJ, 765, 46
+# - ISM isotope ratios: Milam et al. (2005), ApJ, 634, 1126
+# - ISM isotope ratios: Wilson et al. (1999), Reports on Progress in Physics, 62, 143
+# - Metallicities: Cristofari et al. (2023), MNRAS, 522, 1342
+# - CO line lists: Li et al. (2015), ApJS, 216, 15
+#
+target,star_name,teff_k,metallicity_mh,alpha_fe,alpha_fe_error,carbon_isotope_ratio_q16,carbon_isotope_ratio_q50,carbon_isotope_ratio_q84,carbon_lnb,carbon_sigma,oxygen_isotope_ratio_q16,oxygen_isotope_ratio_q50,oxygen_isotope_ratio_q84,oxygen_lnb,oxygen_sigma
+gl338B,Gl 338B,3899.00,-0.08,0.04,0.10,79.71,81.73,83.82,482.37,10.00,1134.59,1750.73,3131.05,5.89,3.86
+gl846,Gl 846,3821.00,0.05,-0.01,0.10,71.72,73.04,74.39,-938.61,10.00,488.87,551.26,627.87,17.63,6.24
+gl410,Gl 410,3842.00,0.01,0.03,0.10,69.87,71.82,73.84,-354.10,10.00,830.10,1274.05,2215.60,-5.39,
+gl205,Gl 205,3747.00,0.43,-0.07,0.10,69.00,69.91,70.78,2154.11,10.00,286.68,299.13,313.02,176.92,19.17
+gl514,Gl 514,3710.00,-0.12,0.04,0.10,76.59,79.30,82.09,165.39,18.56,1068.16,1992.13,4065.87,-20.12,
+gl880,Gl 880,3702.00,0.25,-0.05,0.10,80.10,81.77,83.52,,10.00,370.65,404.83,443.31,,9.01
+gl15A,Gl 15A,3660.00,-0.33,0.07,0.10,86.03,95.47,106.22,19.41,6.53,1647.53,3415.73,6335.31,-3.39,
+gl412A,Gl 412A,3650.00,-0.43,0.10,0.10,99.17,118.17,142.35,5.37,3.72,1119.63,2529.91,5651.03,-3.82,
+gl382,Gl 382,3645.00,0.13,-0.02,0.10,60.02,61.44,62.93,561.67,10.00,544.98,676.57,865.31,-3.03,
+gl411,Gl 411,3601.00,-0.37,0.16,0.10,130.44,174.72,249.95,1.93,2.51,1471.62,3188.30,6286.23,-2.02,-0.68
+gl752A,Gl 752A,3579.00,0.10,-0.01,0.10,90.17,94.91,100.06,116.97,15.71,504.30,720.71,1131.48,1.93,2.51
+gl48,Gl 48,3529.00,0.07,0.07,0.10,110.00,120.32,132.27,23.42,7.13,1846.34,3677.25,6516.11,-0.71,0.53
+gl617B,Gl 617B,3532.00,0.14,-0.01,0.10,54.69,56.91,59.42,195.81,20.14,843.10,1656.41,3616.66,0.27,1.45
+gl436,Gl 436,3531.00,-0.01,-0.00,0.10,60.81,64.33,67.94,105.23,14.94,808.18,1750.97,4094.05,-1.22,0.19
+gl480,Gl 480,3505.00,0.23,-0.01,0.10,76.13,80.47,85.22,99.26,14.53,636.34,1145.61,2497.88,0.12,1.26
+gl849,Gl 849,3512.00,0.26,-0.04,0.10,52.40,53.99,55.74,459.18,10.00,399.15,496.65,663.55,4.93,3.59
+gl408,Gl 408,3512.00,-0.16,0.01,0.10,59.64,63.58,68.15,55.59,11.07,1406.97,2837.67,5617.03,-6.86,
+gl687,Gl 687,3498.00,-0.01,0.05,0.10,91.93,101.69,113.13,22.68,7.02,1563.56,3123.02,5877.54,-2.29,-1.39
+gl725A,Gl 725A,3485.00,-0.25,0.14,0.10,108.04,134.57,176.90,4.81,3.55,1778.28,3531.99,6589.70,-2.03,-0.71
+gl317,Gl 317,3473.00,0.19,-0.04,0.10,70.55,74.11,78.04,126.68,16.32,331.28,425.66,563.45,2.97,2.94
+gl4333,Gl 4333,3467.00,0.22,-0.03,0.10,103.29,110.33,118.32,57.73,11.27,557.19,853.92,1567.17,-0.05,0.88
+gl4063,Gl 4063,3419.00,0.36,-0.08,0.10,54.80,56.29,57.81,572.31,10.00,214.47,232.72,254.15,38.17,9.33
+gl725B,Gl 725B,3399.00,-0.27,0.13,0.10,113.88,151.75,217.17,1.85,2.47,1430.56,3092.01,6150.96,-1.21,0.20
+gl876,Gl 876,3395.00,0.11,-0.05,0.10,53.67,56.03,58.66,177.37,19.20,478.84,789.19,1510.86,-0.36,0.72
+gl445,Gl 445,3379.00,-0.24,0.13,0.10,132.31,194.36,313.87,-1.03,0.33,1451.63,3282.63,6404.36,-1.68,-0.22
+gl15B,Gl 15B,3362.00,-0.43,0.01,0.10,78.21,92.11,110.48,5.76,3.83,1195.81,2667.42,5788.84,-5.84,
+gl699,Gl 699,3326.00,-0.46,0.12,0.10,172.68,303.68,564.36,0.79,1.89,890.98,2344.38,5779.19,0.31,1.50
+gl447,Gl 447,3291.00,-0.21,-0.02,0.10,82.00,91.86,103.51,20.80,6.74,1426.99,2999.27,5952.49,-3.44,
+gl1151,Gl 1151,3278.00,-0.16,-0.03,0.10,72.26,79.14,87.45,32.78,8.72,1934.64,3684.06,6475.07,-1.40,0.04
+gl905,Gl 905,3161.00,0.05,-0.06,0.10,81.11,86.25,91.92,93.49,14.12,479.17,778.48,1627.25,0.97,2.01
+gl1002,Gl 1002,3110.00,-0.26,-0.00,0.10,113.77,130.87,155.51,11.34,5.09,1319.32,2946.29,6117.49,1.32,2.21
+gl1286,Gl 1286,3121.00,-0.20,-0.03,0.10,88.52,97.06,107.52,31.94,8.26,2039.89,3752.51,6387.80,-2.53,

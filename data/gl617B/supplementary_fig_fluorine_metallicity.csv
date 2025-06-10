@@ -1,0 +1,44 @@
+# Supplementary data for fluorine abundances in M dwarf atmospheres
+# Target: gl617B
+# Generated on: 2025-06-10 11:28:11
+# Authors: Darío González Picos, Ignas Snellen and Sam de Regt
+# Contact: picos@strw.leidenuniv.nl
+#
+# Data description:
+# This file contains fluorine abundance measurements from high-resolution
+# infrared spectroscopy and Bayesian atmospheric retrieval analysis of M dwarf stars.
+# Fluorine abundances are derived from HF molecular lines in the K-band.
+#
+# Solar reference values used for normalization:
+# A(F)_sun = 4.40 ± 0.25 (Maiorca et al. 2014)
+# where A(F) = log10(N_F/N_H) + 12
+#
+# Methodology:
+# - Fluorine abundances derived from HF_high line list
+# - Solar-normalized: [F/H] = log10(N_F/N_H) - A(F)_sun
+# - Atmospheric retrieval using petitRADTRANS radiative transfer
+# - Uncertainties represent 1-sigma (68% confidence) intervals
+#
+# Column descriptions:
+# fluorine_abundance_q16: [F/H] 16th percentile (1-sigma lower bound)
+# fluorine_abundance_q50: [F/H] 50th percentile (median)
+# fluorine_abundance_q84: [F/H] 84th percentile (1-sigma upper bound)
+# metallicity_mh: [M/H] metallicity from literature
+# metallicity_mh_error: [M/H] metallicity uncertainty
+#
+# Units:
+# Fluorine abundances: dex (solar-normalized logarithmic scale)
+# Metallicity: dex (solar-normalized logarithmic scale)
+#
+# References:
+# - Solar F abundance: Maiorca et al. (2014), ApJ, 788, 149
+# - Metallicity values: Cristofari et al. (2023), MNRAS, 522, 1342
+# - HF line list: Li et al. (2013), ApJS, 216, 15
+#
+# Notes:
+# - Negative [F/H] values indicate sub-solar fluorine abundances
+# - Positive [F/H] values indicate super-solar fluorine abundances
+# - [M/H] represents overall stellar metallicity relative to the Sun
+#
+fluorine_abundance_q16,fluorine_abundance_q50,fluorine_abundance_q84,metallicity_mh,metallicity_mh_error
+-0.14,-0.12,-0.10,0.14,0.10

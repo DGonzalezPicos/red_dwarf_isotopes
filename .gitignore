@@ -37,8 +37,10 @@ ENV/
 !data/.gitkeep
 *.npz
 *.fits
-*.csv
 *.txt
+*order_0.csv
+*order_1.csv
+*order_2.csv
 !requirements.txt
 
 # Documentation
@@ -55,3 +57,4 @@ dist/
 build/ 
 
 .move_data.py
+data/species_info.csv
